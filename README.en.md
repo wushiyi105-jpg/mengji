@@ -55,6 +55,13 @@ python -m mengji web --port 8774
 
 `data/sleep-sample.json` holds ten sample days; `seed` converts `days_ago` into dates, and four of them carry dream text so `trend` and `dream` have something to work on.
 
+Run in Docker (the container uses the default port 8774):
+
+```bash
+docker build -t mengji .
+docker run -p 8774:8774 mengji
+```
+
 ## Command reference
 
 | Command | What it does |
@@ -68,6 +75,46 @@ python -m mengji web --port 8774
 | `rm <date>` / `stats` / `web` | Delete a day / stats / web |
 
 Global flags: `--mock`, `--json`, `--model`, `--base-url`, `--api-key`, `--db`.
+
+## 🤔 Why not just ask a general LLM
+
+A general model can listen to your sleep description and give advice. Mengji adds the three things it cannot:
+
+1. **Statistics are computed locally** — average duration, volatility and low-sleep streaks are calculated locally; the model writes one summary and may only cite numbers already in the statistics, so the same records compute the same conclusion.
+2. **Dreams stay associative** — eight motifs ship built in (water, flying, falling, being chased, exams, family, teeth, getting lost), a motif is kept only if a matching word appears in the dream text, and every reading carries "cultural association, not interpretation, not diagnosis" without predicting fortune.
+3. **Records stay local** — sleep and dreams are private; they sit in local SQLite and are not uploaded, and a model call sends only today's entry.
+4. **Works offline** — recording, listing, trends and rule checks are local; without a key the analysis is template-based and dreams get one line from the motif table, with the template nature stated.
+
+## 🎯 Use cases
+
+- **A minute a day**: how long you slept, a score out of five, what you dreamt; a week later you can see which nights were genuinely short.
+- **A monthly trend**: average duration, average quality and whether a three-day short streak exists — more reliable than "this week felt fine".
+- **A dream that keeps returning**: write it down and see the motif as a stress clue, rather than looking up whether dreaming of lost teeth is an omen.
+
+## 🗺 Roadmap
+
+- **Link with Xinyu**: sleep and mood on one timeline to see whether low days coincide with short sleep.
+- **Sleep target**: set a target duration and track the hit rate, not just the average.
+- **Motif counts**: which motifs recur over a period, with counts instead of one reading at a time.
+- **Export for a doctor**: a table of a period's records that makes an appointment easier to explain.
+- **Gentle nudges**: one reminder after a short-sleep streak, not a daily pop-up.
+
+## ❓ FAQ
+
+**Where do I get an API key?**
+The project ships without one. It talks to DeepSeek (`https://api.deepseek.com`) by default — set `LLM_API_KEY`; any OpenAI-compatible endpoint works.
+
+**Where is data stored, and is it uploaded?**
+Sleep records are in local SQLite; a model call sends today's entry, not the historical trend.
+
+**Does it work without a key?**
+Recording, listing and trends work, with rule-template analysis and motif-table dream notes; only the wording is less detailed.
+
+**How do I switch models?**
+Change `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY`, or override with `--model`.
+
+**Are the dream readings accurate?**
+It makes no such promise. Motif associations are cultural reference points, not interpretation or diagnosis; a recurring dream is better treated as a stress clue than a prophecy.
 
 ## How it works
 
