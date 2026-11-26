@@ -160,6 +160,6 @@ mengji/
 
 ## Author
 
-shiyi · GitHub [@wushiyi105-jpg](https://github.com/wushiyi105-jpg) · wushiyi105@gmail.com
+Luo Zhizhi · 15071889700
 
 MIT License, Copyright (c) 2026 wushiyi105-jpg
