@@ -13,7 +13,7 @@ from .db import Database
 PAGE = """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>梦记 · 睡眠记录</title>
+<title>梦记 · 昨晚睡了多久</title>
 <style>
 :root{--bg:#0e0f1a;--card:#181a2b;--line:#2a2d45;--text:#e8e9f5;--dim:#8f93b3;--accent:#8f7cf0;--warn:#e5b45c}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.7 "Segoe UI","Microsoft YaHei",sans-serif}
@@ -36,8 +36,72 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 th{color:var(--dim);font-weight:500}
 .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--dim);margin-left:8px}
 .badge.off{color:var(--accent);border-color:var(--accent)}
+
+h1{font-size:clamp(31px,5vw,39px);line-height:1.26}
+.prod{display:block;font-size:11px;line-height:1.4;letter-spacing:.18em;font-weight:650;margin-bottom:8px;opacity:.72}
+.lede,.sub{max-width:62ch;line-height:1.75}
+.route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 20px;border:1px solid var(--line);background:var(--line)}
+.route span{padding:11px 13px;background:var(--card);font-size:12px;line-height:1.5}
+.route b{display:block;font-size:10px;letter-spacing:.1em;margin-bottom:3px;opacity:.66}
+button{min-height:46px}
+input,select{min-height:44px}
+@media(max-width:680px){
+  .wrap{padding:20px 16px 56px}
+  .route{grid-template-columns:1fr}
+  h1{font-size:30px!important}
+  .row>div{min-width:100%!important}
+  button{width:100%}
+}
+
+body{background:#ece8f0;color:#262435;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:900px}
+header{background:#20243d;color:#f4f0ff;padding:26px 24px 24px;margin-bottom:20px;border-bottom:3px solid #4b5c96}
+header h1{font-family:"Cascadia Mono",Consolas,"PingFang SC",monospace;font-size:36px;line-height:1.28;letter-spacing:-.03em}
+header p{color:#c8c4da;font-size:14px}
+.card{background:#fbf9fc;border:1px solid #d5d0de;border-radius:4px;box-shadow:0 1px 0 #e3dfe9}
+button{background:#3b4a7a;border-radius:4px;letter-spacing:.05em}
+button:hover{background:#303d66}
+textarea,input,select{background:#fff;border-color:#cec8d9;border-radius:4px;font-variant-numeric:tabular-nums}
+textarea:focus,input:focus,select:focus{border-color:#3b4a7a;box-shadow:0 0 0 2px #d9dced}
+.cost .cell b,.cell b{font-family:"Cascadia Mono",Consolas,monospace}
+.item{border-left:3px solid #4b5c96}
+h3{color:#3b4a7a;letter-spacing:.08em}
+
+
+/* palette-normalized */
+:root{--bg:#171a2b;--card:#212539;--ink:#f0edf7;--text:#f0edf7;--dim:#a9a6bd;--line:#363a53;--accent:#8f7cf0}
+pre{background:#171a2b;color:#f0edf7;border-color:#363a53;border-radius:2px}
+
+/* polish-batch1 */
+button.ghost,button.secondary{background:transparent!important;color:#8f7cf0!important;border:1px solid #363a53!important}
+
+/* mobile-32 */
+
+@media(max-width:760px){
+  main{grid-template-columns:1fr!important}
+  aside{border-right:0!important;border-bottom:1px solid #363a53;width:auto!important}
+  section{padding:16px!important}
+  .row{flex-wrap:wrap!important}
+  .row>div{min-width:100%!important}
+  h1{font-size:30px!important}
+  .route{grid-template-columns:1fr!important}
+  button{min-height:48px}
+  pre{overflow-x:auto}
+}
+
+/* mobile-height */
+@media(max-width:760px){main{min-height:auto!important}aside{min-height:0!important}}
+/* mengji-dark-fix */
+body{background:#171a2b!important;color:#f0edf7!important}
+header{background:#111426!important;color:#f0edf7!important;border-bottom-color:#4a3f78!important}
+.card{background:#212539!important;border-color:#363a53!important;box-shadow:none!important}
+input,textarea,select{background:#111426!important;color:#f0edf7!important;border-color:#363a53!important}
+input::placeholder,textarea::placeholder{color:#7b7f9e!important}
+label,.sub,.meta,.dim,small{color:#a9a6bd!important}
+table,.table th,.table td{border-color:#363a53!important}
 </style></head><body><div class="wrap">
-<h1>梦记 · 睡眠记录<span id="status" class="badge">…</span></h1>
+<h1><span class="prod">梦记</span>昨晚，睡了多久 <span id="status" class="badge">…</span></h1>
+  <p class="sub">给想观察作息的人：醒来先记时间和主观感受，梦境可单独设为私密；一周后把作息、质量和事件放在同一条时间带。</p>
 <div class="sub">记时长、自评质量、梦。统计本地算,解释交给模型,梦只当联想看。</div>
 <div class="tabs">
   <button class="tab on" data-tab="day">记录与单日</button>
@@ -45,7 +109,9 @@ th{color:var(--dim);font-weight:500}
 </div>
 
 <div class="panel on" id="day">
-  <div class="card">
+  
+  <div class="route" aria-label="任务步骤"><span><b>01</b>先记醒来的时间</span><span><b>02</b>补一句感受</span><span><b>03</b>一周一起回看</span></div>
+<div class="card">
     <div class="row">
       <div><label>日期</label><input id="day" type="date"></div>
       <div><label>睡了几个小时</label><input id="hours" type="number" step="0.1" min="0" max="24" value="7.5"></div>
@@ -294,3 +360,5 @@ def serve(host: str = "127.0.0.1", port: int = 8774, db_path: str = "data/mengji
     finally:
         httpd.server_close()
         db.close()
+
+
