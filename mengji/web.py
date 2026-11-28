@@ -99,6 +99,20 @@ input,textarea,select{background:#111426!important;color:#f0edf7!important;borde
 input::placeholder,textarea::placeholder{color:#7b7f9e!important}
 label,.sub,.meta,.dim,small{color:#a9a6bd!important}
 table,.table th,.table td{border-color:#363a53!important}
+
+/* mobile-sticky-cta */
+.mobile-cta{display:none}
+@media(max-width:760px){
+  body{padding-bottom:88px}
+  .route{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .route span{padding:8px 8px!important;font-size:11px!important;line-height:1.35!important}
+  .route b{font-size:9px!important;margin-bottom:1px!important}
+  .mobile-cta{position:fixed;left:12px;right:12px;bottom:12px;z-index:80;display:flex;
+    padding:8px;border:1px solid rgba(0,0,0,.08);border-radius:12px;
+    background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+    box-shadow:0 10px 28px rgba(16,24,40,.18)}
+  .mobile-cta button{width:100%;min-height:52px;margin:0!important;font-size:15px}
+}
 </style></head><body><div class="wrap">
 <h1><span class="prod">梦记</span>昨晚，睡了多久 <span id="status" class="badge">…</span></h1>
   <p class="sub">给想观察作息的人：醒来先记时间和主观感受，梦境可单独设为私密；一周后把作息、质量和事件放在同一条时间带。</p>
@@ -204,7 +218,28 @@ $('#btnTrend').onclick=async()=>{
   }catch(e){$('#status').textContent='读取失败';}
   await loadList();
 })();
-</script></body></html>"""
+</script>
+<script>
+(function(){
+  var want = "分析这一天";
+  function norm(t){ return String(t||'').replace(/\s+/g,''); }
+  var all=[].slice.call(document.querySelectorAll('button'));
+  var src=null, fallback=null;
+  for(var i=0;i<all.length;i++){
+    var b=all[i];
+    if(b.offsetParent===null||b.disabled) continue;
+    if(!fallback) fallback=b;
+    if(norm(b.textContent).indexOf(norm(want))>=0){ src=b; break; }
+  }
+  if(!src) src=fallback;
+  if(!src) return;
+  var bar=document.createElement('div'); bar.className='mobile-cta';
+  var btn=src.cloneNode(true); btn.removeAttribute('id'); btn.type='button';
+  btn.addEventListener('click',function(e){e.preventDefault(); src.click();});
+  bar.appendChild(btn); document.body.appendChild(bar);
+})();
+</script>
+</body></html>"""
 
 
 class _Handler(BaseHTTPRequestHandler):
